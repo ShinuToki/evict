@@ -59,18 +59,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            name: evict-linux-x86_64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             name: evict-windows-x86_64.exe
-          - os: macos-14
-            target: aarch64-apple-darwin
-            name: evict-macos-arm64
-          - os: macos-15
-            target: x86_64-apple-darwin
-            name: evict-macos-x86_64
 
     steps:
       - uses: actions/checkout@v6
@@ -93,10 +84,6 @@ jobs:
 
       - name: Build Release
         run: cargo build --release --target ${{ matrix.target }}
-
-      - name: Strip binary (Unix)
-        if: runner.os != 'Windows'
-        run: strip target/${{ matrix.target }}/release/evict
 
       - name: Prepare Artifacts
         shell: bash
