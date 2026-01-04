@@ -41,11 +41,13 @@ pub fn parse_args() -> Result<CliArgs, String> {
     let program_name = args.first().map(|s| s.as_str()).unwrap_or("evict");
 
     // Check if help flag is provided
-    if args.get(1).is_some_and(|arg| arg == "-h" || arg == "--help") {
+    if args
+        .get(1)
+        .is_some_and(|arg| arg == "-h" || arg == "--help")
+    {
         display_help(program_name);
         std::process::exit(0);
     }
-
 
     // Parse the port argument
     let port_str = args.get(1).ok_or_else(|| {
