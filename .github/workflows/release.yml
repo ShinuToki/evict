@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -12,7 +12,7 @@ jobs:
   build-and-release:
     name: Build and Release
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -46,15 +46,15 @@ jobs:
         run: |
           $version = "${{ steps.get_version.outputs.VERSION }}"
           $archiveName = "evict-v$version-windows-x86_64.zip"
-          
+
           New-Item -ItemType Directory -Force -Path release-temp
-          
+
           Copy-Item target/release/evict.exe release-temp/
           Copy-Item README.md release-temp/
           Copy-Item LICENSE release-temp/
-          
+
           Compress-Archive -Path release-temp/* -DestinationPath $archiveName
-          
+
           echo "ARCHIVE_NAME=$archiveName" >> $env:GITHUB_ENV
 
       - name: Create GitHub Release
