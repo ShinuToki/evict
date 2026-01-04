@@ -40,7 +40,8 @@ unsafe fn get_process_name_from_handle(handle: HANDLE) -> Result<String, String>
     }
 
     // Convert from wide string to Rust String
-    let full_path = String::from_utf16_lossy(&buffer[..size as usize]);
+    let safe_slice = buffer.get(..size as usize).unwrap_or(&[]);
+    let full_path = String::from_utf16_lossy(safe_slice);
 
     // Extract just the filename from the full path
     let filename = full_path

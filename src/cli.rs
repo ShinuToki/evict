@@ -41,21 +41,19 @@ pub fn parse_args() -> Result<CliArgs, String> {
     let program_name = args.first().map(|s| s.as_str()).unwrap_or("evict");
 
     // Check if help flag is provided
-    if args.len() >= 2 && (args[1] == "-h" || args[1] == "--help") {
+    if args.get(1).is_some_and(|arg| arg == "-h" || arg == "--help") {
         display_help(program_name);
         std::process::exit(0);
     }
 
-    // Check if port argument is provided
-    if args.len() < 2 {
-        return Err(format!(
-            "Usage: {} <port>\n\nTerminate the process using the specified port.\n\nExample:\n  {} 8080\n\nFor more information, use: {} --help",
-            program_name, program_name, program_name
-        ));
-    }
 
     // Parse the port argument
-    let port_str = &args[1];
+    let port_str = args.get(1).ok_or_else(|| {
+        format!(
+            "Usage: {} <port>\n\nTerminate the process using the specified port.\n\nExample:\n  {} 8080\n\nFor more information, use: {} --help",
+            program_name, program_name, program_name
+        )
+    })?;
     let port = port_str
         .parse::<u16>()
         .map_err(|_| format!("Invalid port: '{}' is not a valid number", port_str))?;
