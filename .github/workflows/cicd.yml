@@ -21,7 +21,7 @@ env:
 jobs:
   check:
     name: Check & Test
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
@@ -61,7 +61,7 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            name: evict-windows-x86_64.exe
+            archive_name: windows-x86_64
 
     steps:
       - uses: actions/checkout@v6
@@ -85,15 +85,38 @@ jobs:
       - name: Build Release
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Prepare Artifacts
+      - name: Create Archive
         shell: bash
         run: |
-          mkdir release
+          # Get version from tag
+          VERSION=${GITHUB_REF#refs/tags/}
+
+          # Determine executable name and archive extension
           if [ "${{ runner.os }}" = "Windows" ]; then
-            cp target/${{ matrix.target }}/release/evict.exe release/${{ matrix.name }}
+            EXE_NAME="evict.exe"
+            ARCHIVE_EXT=".zip"
           else
-            cp target/${{ matrix.target }}/release/evict release/${{ matrix.name }}
+            EXE_NAME="evict"
+            ARCHIVE_EXT=".tar.gz"
           fi
+
+          # Create archive name: [program]-[version]-[system].[ext]
+          ARCHIVE_NAME="evict-${VERSION}-${{ matrix.archive_name }}${ARCHIVE_EXT}"
+
+          # Prepare archive contents
+          mkdir -p archive_contents
+          cp "target/${{ matrix.target }}/release/${EXE_NAME}" archive_contents/
+          cp README.md LICENSE archive_contents/
+
+          # Create the compressed archive
+          mkdir -p release
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a "release/${ARCHIVE_NAME}" ./archive_contents/*
+          else
+            tar -czf "release/${ARCHIVE_NAME}" -C archive_contents .
+          fi
+
+          echo "Created: ${ARCHIVE_NAME}"
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
